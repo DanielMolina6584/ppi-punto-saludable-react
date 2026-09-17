@@ -888,6 +888,11 @@ td small {
   font-size: 12px;
   margin: 6px 0 20px;
 }
+.auth-error {
+  color: #b44c48;
+  font-size: 12px;
+  margin: -4px 0 16px;
+}
 .form-row a {
   text-decoration: none;
 }

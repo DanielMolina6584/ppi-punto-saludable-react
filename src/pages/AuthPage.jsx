@@ -2,11 +2,10 @@ import { ChevronRight } from "lucide-react";
 import { useApp } from "../context/AppContext";
 
 export default function AuthPage() {
-  const { page, login, go } = useApp();
-  const register = page === "register";
+  const { login, authError } = useApp();
   const submit = (event) => {
     event.preventDefault();
-    login(event.currentTarget.role.value);
+    login(event.currentTarget.email.value, event.currentTarget.password.value);
   };
   return (
     <div className="auth-page">
@@ -31,46 +30,39 @@ export default function AuthPage() {
       <div className="auth-form-wrap">
         <div className="auth-form">
           <span className="eyebrow">
-            {register ? "Nuevo usuario" : "Bienvenido de nuevo"}
+            Bienvenido de nuevo
           </span>
-          <h2>{register ? "Crea tu cuenta" : "Inicia sesión"}</h2>
+          <h2>Inicia sesión</h2>
           <p className="form-intro">
             Accede a tu catálogo y revisa tus pedidos.
           </p>
           <form onSubmit={submit}>
-            {register && (
-              <label>
-                Nombre completo
-                <input required placeholder="Tu nombre" />
-              </label>
-            )}
             <label>
               Correo electrónico
-              <input type="email" required placeholder="tu@correo.com" />
+              <input
+                name="email"
+                type="email"
+                required
+                placeholder="tu@correo.com"
+              />
             </label>
             <label>
               Contraseña
-              <input type="password" required placeholder="••••••••" />
+              <input
+                name="password"
+                type="password"
+                required
+                placeholder="Tu contraseña"
+              />
             </label>
-            <label>
-              Perfil de acceso
-              <select name="role" defaultValue="buyer">
-                <option value="buyer">Comprador</option>
-                <option value="staff">Vendedor</option>
-              </select>
-            </label>
+            {authError && <p className="auth-error">{authError}</p>}
             <button className="button primary full">
-              {register ? "Crear cuenta" : "Entrar"} <ChevronRight size={18} />
+              Entrar <ChevronRight size={18} />
             </button>
           </form>
-          <p className="switch-auth">
-            {register ? "¿Ya tienes una cuenta?" : "¿Aún no tienes una cuenta?"}{" "}
-            <button onClick={() => go(register ? "login" : "register")}>
-              {register ? "Inicia sesión" : "Regístrate"}
-            </button>
-          </p>
           <small className="demo-hint">
-            Demo local: escoge comprador o vendedor.
+            Usuarios demo: maria@colegio.edu.co / maria123 o
+            andres@colegio.edu.co / andres123
           </small>
         </div>
       </div>

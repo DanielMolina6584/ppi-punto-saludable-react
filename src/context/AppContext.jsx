@@ -15,6 +15,7 @@ export function AppProvider({ children }) {
   const [orders, setOrders] = useState(initialOrders);
   const [cart, setCart] = useState({});
   const [notice, setNotice] = useState("");
+  const [authError, setAuthError] = useState("");
 
   const cartItems = useMemo(
     () =>
@@ -49,14 +50,25 @@ export function AppProvider({ children }) {
     cartCount,
     cartTotal,
     notice,
+    authError,
     go,
-    login(role) {
-      setUser(demoUsers.find((item) => item.role === role));
-      go(role === "staff" ? "admin" : "catalog");
+    login(email, password) {
+      const authenticatedUser = demoUsers.find(
+        (item) => item.email === email && item.password === password,
+      );
+      if (!authenticatedUser) {
+        setAuthError("El correo o la contraseña no son correctos.");
+        return false;
+      }
+      setAuthError("");
+      setUser(authenticatedUser);
+      go(authenticatedUser.role === "staff" ? "admin" : "catalog");
+      return true;
     },
     logout() {
       setUser(null);
       setCart({});
+      setAuthError("");
       setPage("login");
     },
     addToCart(product, quantity = 1) {

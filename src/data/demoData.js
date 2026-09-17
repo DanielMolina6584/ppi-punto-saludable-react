@@ -74,12 +74,14 @@ export const demoUsers = [
     id: 1,
     name: "María González",
     email: "maria@colegio.edu.co",
+    password: "maria123",
     role: "buyer",
   },
   {
     id: 2,
     name: "Andrés Rojas",
     email: "andres@colegio.edu.co",
+    password: "andres123",
     role: "staff",
   },
 ];
