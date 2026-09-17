@@ -32,6 +32,13 @@ export function AppProvider({ children }) {
     (sum, item) => sum + item.product.price * item.quantity,
     0,
   );
+  const nextOrderId = () => {
+    const highest = orders.reduce((max, order) => {
+      const number = Number(String(order.id).replace("PS-", ""));
+      return Number.isNaN(number) ? max : Math.max(max, number);
+    }, 1048);
+    return `PS-${highest + 1}`;
+  };
   const go = (destination) => {
     setPage(destination);
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -72,6 +79,10 @@ export function AppProvider({ children }) {
       setPage("login");
     },
     addToCart(product, quantity = 1) {
+      if (product.stock <= 0) {
+        inform(`${product.name} no tiene stock disponible`);
+        return;
+      }
       setCart((current) => ({
         ...current,
         [product.id]: Math.min(
@@ -84,26 +95,50 @@ export function AppProvider({ children }) {
     changeQuantity(id, quantity) {
       setCart((current) => {
         const next = { ...current };
+        const product = products.find((item) => item.id === Number(id));
         if (quantity <= 0) delete next[id];
-        else next[id] = quantity;
+        else next[id] = Math.min(product?.stock || quantity, quantity);
         return next;
       });
     },
-    placeOrder(payment) {
+    placeOrder(payment, deliveryMethod) {
+      const unavailable = cartItems.find(
+        ({ product, quantity }) => quantity > product.stock,
+      );
+      if (unavailable) {
+        inform(`Solo quedan ${unavailable.product.stock} unidades de ${unavailable.product.name}`);
+        return false;
+      }
       const order = {
-        id: `PS-${1049 + orders.length}`,
+        id: nextOrderId(),
         customer: user.name,
+        customerId: user.id,
         status: "pendiente",
         payment,
         paymentStatus: "pendiente",
+        deliveryMethod,
         total: cartTotal,
         date: "Ahora",
         items: `${cartCount} productos`,
+        itemDetails: cartItems.map(({ product, quantity }) => ({
+          id: product.id,
+          name: product.name,
+          price: product.price,
+          quantity,
+        })),
       };
       setOrders((current) => [order, ...current]);
+      setProducts((current) =>
+        current.map((product) => {
+          const item = cartItems.find(({ product: cartProduct }) => cartProduct.id === product.id);
+          if (!item) return product;
+          return { ...product, stock: Math.max(0, product.stock - item.quantity) };
+        }),
+      );
       setCart({});
       inform("¡Pedido creado correctamente!");
       go("orders");
+      return true;
     },
     createProduct(product) {
       setProducts((current) => [
@@ -111,6 +146,163 @@ export function AppProvider({ children }) {
         { ...product, id: Date.now(), image: images.bowl },
       ]);
       inform("Producto agregado al catálogo");
+    },
+    updateProduct(id, changes) {
+      setProducts((current) =>
+        current.map((product) =>
+          product.id === id ? { ...product, ...changes } : product,
+        ),
+      );
+      setCart((current) => {
+        const next = { ...current };
+        const updatedProduct = products.find((product) => product.id === id);
+        const nextStock = changes.stock ?? updatedProduct?.stock;
+        if (next[id] && nextStock !== undefined) {
+          next[id] = Math.min(next[id], Number(nextStock));
+          if (next[id] <= 0) delete next[id];
+        }
+        return next;
+      });
+    },
+    updateOrderStatus(id, status) {
+      setOrders((current) =>
+        current.map((order) =>
+          order.id === id ? { ...order, status } : order,
+        ),
+      );
+      inform("Estado del pedido actualizado");
+    },
+    respondOrderModification(id, accepted, response = "") {
+      const order = orders.find((item) => item.id === id);
+      const request = order?.modificationRequest;
+      if (!order || !request) return false;
+      if (!accepted) {
+        setOrders((current) =>
+          current.map((item) =>
+            item.id === id
+              ? {
+                  ...item,
+                  status: request.previousStatus || "pendiente",
+                  modificationStatus: "rechazada",
+                  modificationResponse: response,
+                }
+              : item,
+          ),
+        );
+        inform("Solicitud rechazada");
+        return true;
+      }
+      if (request.type === "items" && request.items?.length) {
+        const missingStock = request.items.find((requestedItem) => {
+          const currentItem = order.itemDetails?.find(
+            (item) => item.id === requestedItem.id,
+          );
+          const product = products.find((item) => item.id === requestedItem.id);
+          const available = (product?.stock || 0) + (currentItem?.quantity || 0);
+          return requestedItem.quantity > available;
+        });
+        if (missingStock) {
+          inform(`No hay stock suficiente para ${missingStock.name}`);
+          return false;
+        }
+      }
+      setOrders((current) =>
+        current.map((item) => {
+          if (item.id !== id) return item;
+          const updatedOrder = {
+            ...item,
+            status: request.previousStatus || "pendiente",
+            modificationStatus: "aceptada",
+            modificationResponse: response,
+          };
+          if (request.type === "delivery") {
+            updatedOrder.deliveryMethod = request.value;
+          }
+          if (request.type === "payment") {
+            updatedOrder.payment = request.value;
+            updatedOrder.paymentStatus =
+              request.value === "Efectivo" ? "pendiente" : item.paymentStatus;
+          }
+          if (request.type === "items" && request.items?.length) {
+            const itemDetails = request.items.filter(
+              (requestedItem) => requestedItem.quantity > 0,
+            );
+            updatedOrder.itemDetails = itemDetails;
+            updatedOrder.items = `${itemDetails.reduce(
+              (sum, requestedItem) => sum + requestedItem.quantity,
+              0,
+            )} productos`;
+            updatedOrder.total = itemDetails.reduce(
+              (sum, requestedItem) =>
+                sum + requestedItem.price * requestedItem.quantity,
+              0,
+            );
+          }
+          return updatedOrder;
+        }),
+      );
+      if (request.type === "items" && request.items?.length) {
+        setProducts((current) =>
+          current.map((product) => {
+            const previousItem = order.itemDetails?.find(
+              (item) => item.id === product.id,
+            );
+            const nextItem = request.items.find((item) => item.id === product.id);
+            const difference =
+              (nextItem?.quantity || 0) - (previousItem?.quantity || 0);
+            if (!difference) return product;
+            return { ...product, stock: product.stock - difference };
+          }),
+        );
+      }
+      inform("Solicitud aceptada");
+      return true;
+    },
+    cancelOrder(id, reason) {
+      const order = orders.find((item) => item.id === id);
+      if (!order || order.status === "cancelado") return;
+      setOrders((current) =>
+        current.map((item) =>
+          item.id === id
+            ? {
+                ...item,
+                status: "cancelado",
+                cancellationReason: reason,
+                modificationReason: "",
+              }
+            : item,
+        ),
+      );
+      if (order.itemDetails?.length) {
+        setProducts((current) =>
+          current.map((product) => {
+            const item = order.itemDetails.find((detail) => detail.id === product.id);
+            if (!item) return product;
+            return { ...product, stock: product.stock + item.quantity };
+          }),
+        );
+      }
+      inform("Pedido cancelado");
+    },
+    requestOrderModification(id, request) {
+      setOrders((current) =>
+        current.map((order) =>
+          order.id === id
+            ? {
+                ...order,
+                status: "modificacion_solicitada",
+                modificationReason: request.reason,
+                modificationRequest: {
+                  ...request,
+                  previousStatus: order.status,
+                },
+                modificationStatus: "pendiente",
+                modificationResponse: "",
+              }
+            : order,
+        ),
+      );
+      inform("Solicitud de modificación enviada");
     },
   };
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

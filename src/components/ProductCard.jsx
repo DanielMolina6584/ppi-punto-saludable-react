@@ -1,9 +1,12 @@
 import { Minus, Plus, ShoppingCart } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { money } from "../utils/formatters";
 
 export default function ProductCard({ product, openProduct, addToCart }) {
   const [quantity, setQuantity] = useState(1);
+  useEffect(() => {
+    setQuantity((current) => Math.min(current, Math.max(1, product.stock)));
+  }, [product.stock]);
   return (
     <article className="product-card">
       <button className="image-button" onClick={() => openProduct(product)}>
@@ -16,7 +19,7 @@ export default function ProductCard({ product, openProduct, addToCart }) {
         </button>
         <p>{product.description}</p>
         <div className="product-meta">
-          <strong>{money(product.price)}</strong>
+          <strong>{money(product.price * quantity)}</strong>
           <span>{product.stock} disponibles</span>
         </div>
         <div className="card-actions">
@@ -27,6 +30,7 @@ export default function ProductCard({ product, openProduct, addToCart }) {
             <span>{quantity}</span>
             <button
               onClick={() => setQuantity(Math.min(product.stock, quantity + 1))}
+              disabled={product.stock <= 0}
             >
               <Plus size={15} />
             </button>
@@ -34,9 +38,10 @@ export default function ProductCard({ product, openProduct, addToCart }) {
           <button
             className="button primary add"
             onClick={() => addToCart(product, quantity)}
+            disabled={product.stock <= 0}
           >
             <ShoppingCart size={16} />
-            Agregar
+            {product.stock > 0 ? "Agregar" : "Sin stock"}
           </button>
         </div>
       </div>

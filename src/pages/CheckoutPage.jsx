@@ -11,6 +11,9 @@ export default function CheckoutPage() {
       event.currentTarget.payment.value === "cash"
         ? "Efectivo"
         : "Transferencia",
+      event.currentTarget.delivery.value === "home"
+        ? "Domicilio"
+        : "Recoger en tienda",
     );
   };
   return (
@@ -32,6 +35,28 @@ export default function CheckoutPage() {
               <span>
                 <strong>Transferencia</strong>
                 <small>Reportada para verificación.</small>
+              </span>
+            </label>
+          </div>
+          <h2>Entrega</h2>
+          <div className="payment-options">
+            <label>
+              <input
+                type="radio"
+                name="delivery"
+                value="pickup"
+                defaultChecked
+              />
+              <span>
+                <strong>Recoger</strong>
+                <small>El pedido queda listo para reclamar.</small>
+              </span>
+            </label>
+            <label>
+              <input type="radio" name="delivery" value="home" />
+              <span>
+                <strong>Domicilio</strong>
+                <small>El vendedor coordina la entrega.</small>
               </span>
             </label>
           </div>

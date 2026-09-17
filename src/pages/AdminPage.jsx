@@ -7,7 +7,7 @@ import { useApp } from "../context/AppContext";
 import { money } from "../utils/formatters";
 
 export default function AdminPage() {
-  const { products, orders, createProduct, go } = useApp();
+  const { products, orders, createProduct, updateProduct, go } = useApp();
   const [form, setForm] = useState({
     name: "",
     category: "",
@@ -117,12 +117,43 @@ export default function AdminPage() {
                 <td>
                   <strong>{product.name}</strong>
                 </td>
-                <td>{product.category}</td>
-                <td>{money(product.price)}</td>
                 <td>
-                  <span className={product.stock <= 5 ? "stock-low" : ""}>
-                    {product.stock}
-                  </span>
+                  <input
+                    className="table-input"
+                    value={product.category}
+                    onChange={(event) =>
+                      updateProduct(product.id, { category: event.target.value })
+                    }
+                  />
+                </td>
+                <td>
+                  <input
+                    className="table-input"
+                    type="number"
+                    min="0"
+                    value={product.price}
+                    onChange={(event) =>
+                      updateProduct(product.id, {
+                        price: Number(event.target.value),
+                      })
+                    }
+                    aria-label={`Precio de ${product.name}: ${money(product.price)}`}
+                  />
+                </td>
+                <td>
+                  <input
+                    className={`table-input stock-input ${
+                      product.stock <= 5 ? "stock-low" : ""
+                    }`}
+                    type="number"
+                    min="0"
+                    value={product.stock}
+                    onChange={(event) =>
+                      updateProduct(product.id, {
+                        stock: Number(event.target.value),
+                      })
+                    }
+                  />
                 </td>
               </tr>
             ))}

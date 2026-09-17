@@ -163,21 +163,39 @@ h2 {
 .button:hover {
   transform: translateY(-1px);
 }
+.button:disabled,
+.quantity button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+  transform: none;
+}
 .button.primary {
   background: var(--green);
   color: #fff;
   box-shadow: 0 5px 13px #18794e20;
+}
+.button.primary.danger {
+  background: #b44c48;
+  box-shadow: 0 5px 13px #b44c4825;
 }
 .button.secondary {
   background: #fff;
   border: 1px solid #cfe0d3;
   color: var(--dark);
 }
+.button.secondary.danger-text {
+  color: #b44c48;
+  border-color: #f1cbc8;
+}
 .button.small {
   padding: 7px 12px;
   font-size: 12px;
   background: #eef6f0;
   color: var(--green);
+}
+.button.small.danger {
+  background: #fbe9e8;
+  color: #b44c48;
 }
 .button.full {
   width: 100%;
@@ -640,6 +658,177 @@ td small {
 .status.cancelado {
   background: #fbe9e8;
   color: #b44c48;
+}
+.status.entregado {
+  background: #e9f1ea;
+  color: #4d6759;
+}
+.status.modificacion_solicitada {
+  background: #f0ecff;
+  color: #6a4fb3;
+}
+.order-status-select,
+.table-input {
+  width: 100%;
+  min-width: 105px;
+  border: 1px solid #cdded1;
+  border-radius: 7px;
+  padding: 8px 10px;
+  color: var(--dark);
+  background: #fff;
+}
+.order-status-select {
+  min-width: 160px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.table-input.stock-input {
+  max-width: 92px;
+}
+.table-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: #173b2b66;
+  backdrop-filter: blur(5px);
+}
+.order-modal {
+  width: min(520px, 100%);
+  max-height: min(760px, 92vh);
+  overflow-y: auto;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  box-shadow: 0 26px 70px #0d2d1f35;
+  padding: 28px;
+}
+.order-modal.wide {
+  width: min(640px, 100%);
+}
+.modal-heading {
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 20px;
+  padding-bottom: 18px;
+}
+.modal-heading h2 {
+  margin: 0 0 6px;
+}
+.modal-heading p,
+.modal-note {
+  color: var(--muted);
+  font-size: 13px;
+  margin: 0;
+}
+.order-modal label {
+  display: block;
+  color: #486455;
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+.order-modal select,
+.order-modal textarea,
+.order-modal input[type="number"] {
+  display: block;
+  width: 100%;
+  border: 1px solid #cdded1;
+  border-radius: 7px;
+  padding: 11px 12px;
+  margin-top: 7px;
+  outline: none;
+  color: var(--dark);
+  background: #fff;
+}
+.order-modal textarea {
+  min-height: 96px;
+  resize: vertical;
+}
+.order-modal select:focus,
+.order-modal textarea:focus,
+.order-modal input[type="number"]:focus {
+  border-color: var(--green);
+  box-shadow: 0 0 0 3px #18794e12;
+}
+.modal-options {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 11px;
+  margin-bottom: 16px;
+}
+.modal-options label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  padding: 13px 14px;
+  margin: 0;
+}
+.modal-options label:has(input:checked) {
+  border-color: var(--green);
+  background: #f1f9f3;
+}
+.item-change-list {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.item-change-list label {
+  display: grid;
+  grid-template-columns: 1fr 110px;
+  gap: 12px;
+  align-items: center;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  padding: 12px;
+  margin: 0;
+}
+.item-change-list span,
+.item-change-list small {
+  display: block;
+}
+.item-change-list small {
+  color: var(--muted);
+  font-weight: 500;
+  margin-top: 2px;
+}
+.item-change-list input {
+  margin: 0 !important;
+}
+.request-card {
+  background: #f5faf6;
+  border: 1px solid #dbeadf;
+  border-radius: 10px;
+  padding: 15px;
+  margin-bottom: 16px;
+}
+.request-card strong,
+.request-card span,
+.request-card small {
+  display: block;
+}
+.request-card span {
+  color: var(--dark);
+  font-size: 14px;
+  margin-top: 5px;
+}
+.request-card small {
+  color: var(--muted);
+  margin-top: 7px;
+}
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding-top: 6px;
 }
 .order-placeholder {
   text-align: center;
