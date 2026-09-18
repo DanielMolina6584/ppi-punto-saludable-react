@@ -128,3 +128,4 @@ export const notifications = [
   },
   { id: 3, title: "Pago reportado", detail: "María González · PS-1048" },
 ];
+ 
