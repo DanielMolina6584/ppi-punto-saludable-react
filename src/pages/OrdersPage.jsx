@@ -19,6 +19,15 @@ const changeTypeLabel = {
   other: "Otro cambio",
 };
 
+const orderStatuses = [
+  "pendiente",
+  "en_preparacion",
+  "listo",
+  "entregado",
+  "modificacion_solicitada",
+  "cancelado",
+];
+
 const describeModification = (request) => {
   if (!request) return "";
   if (request.type === "delivery") return `Entrega: ${request.value}`;
@@ -62,6 +71,14 @@ export default function OrdersPage({ staff = false, title }) {
   const openCancel = (order) => {
     setCancelModal(order);
     setCancelReason("");
+  };
+  const changeStatus = (order, status) => {
+    if (status === order.status) return;
+    if (status === "cancelado") {
+      openCancel(order);
+      return;
+    }
+    updateOrderStatus(order.id, status);
   };
   const openModification = (order) => {
     setModifyModal(order);
@@ -169,27 +186,26 @@ export default function OrdersPage({ staff = false, title }) {
                 </td>
                 <td>
                   {staff ? (
-                    <select
-                      className={`order-status-select ${order.status}`}
-                      value={order.status}
-                      onChange={(event) => {
-                        if (event.target.value === "cancelado") {
-                          openCancel(order);
-                          return;
-                        }
-                        updateOrderStatus(order.id, event.target.value);
-                      }}
-                      disabled={order.status === "cancelado"}
+                    <div
+                      className="status-options"
+                      role="group"
+                      aria-label={`Estado del pedido ${order.id}`}
                     >
-                      <option value="pendiente">Pendiente</option>
-                      <option value="en_preparacion">En preparación</option>
-                      <option value="listo">Listo</option>
-                      <option value="entregado">Entregado</option>
-                      <option value="modificacion_solicitada">
-                        Modificación solicitada
-                      </option>
-                      <option value="cancelado">Cancelado</option>
-                    </select>
+                      {orderStatuses.map((status) => (
+                        <button
+                          key={status}
+                          type="button"
+                          className={`status-option ${status}${
+                            order.status === status ? " active" : ""
+                          }`}
+                          aria-pressed={order.status === status}
+                          disabled={order.status === "cancelado"}
+                          onClick={() => changeStatus(order, status)}
+                        >
+                          {statusLabel(status)}
+                        </button>
+                      ))}
+                    </div>
                   ) : (
                     <span className={`status ${order.status}`}>
                       {statusLabel(order.status)}

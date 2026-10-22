@@ -139,6 +139,12 @@ a {
   margin: 0;
   color: var(--dark);
 }
+.section-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
 h1 i,
 h2 i {
   font-family: "Playfair Display", serif;
@@ -643,31 +649,36 @@ td small {
   font-size: 11px;
   font-weight: 600;
 }
-.status.pendiente {
+.status.pendiente,
+.status-option.active.pendiente {
   background: #fff4dc;
   color: #ad7912;
 }
-.status.en_preparacion {
+.status.en_preparacion,
+.status-option.active.en_preparacion {
   background: #eaf2ff;
   color: #3971ac;
 }
-.status.listo {
+.status.listo,
+.status-option.active.listo {
   background: #e5f5ee;
   color: #18794e;
 }
-.status.cancelado {
+.status.cancelado,
+.status-option.active.cancelado {
   background: #fbe9e8;
   color: #b44c48;
 }
-.status.entregado {
+.status.entregado,
+.status-option.active.entregado {
   background: #e9f1ea;
   color: #4d6759;
 }
-.status.modificacion_solicitada {
+.status.modificacion_solicitada,
+.status-option.active.modificacion_solicitada {
   background: #f0ecff;
   color: #6a4fb3;
 }
-.order-status-select,
 .table-input {
   width: 100%;
   min-width: 105px;
@@ -677,10 +688,39 @@ td small {
   color: var(--dark);
   background: #fff;
 }
-.order-status-select {
-  min-width: 160px;
-  font-size: 12px;
+.status-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-width: 230px;
+  max-width: 320px;
+}
+.status-option {
+  border: 1px solid #cdded1;
+  border-radius: 20px;
+  background: #fff;
+  color: var(--muted);
+  padding: 5px 10px;
+  font-size: 11px;
   font-weight: 600;
+  line-height: 1.3;
+  transition: 0.2s;
+}
+.status-option:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+.status-option:not(.active):hover:not(:disabled) {
+  background: #f1f9f3;
+  border-color: #b8d6c1;
+  color: var(--dark);
+}
+.status-option.active {
+  border-color: transparent;
+}
+.status-option:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+  transform: none;
 }
 .table-input.stock-input {
   max-width: 92px;
